@@ -1,0 +1,36 @@
+name: Windows portable build
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'app.py'
+      - '.github/workflows/windows.yml'
+jobs:
+  build:
+    runs-on: windows-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Smoke-test Python syntax
+        shell: pwsh
+        run: python -m py_compile app.py
+      - name: Install PyInstaller
+        run: python -m pip install pyinstaller==6.16.0
+      - name: Package portable application
+        shell: pwsh
+        run: |
+          pyinstaller --noconfirm --clean --windowed --onedir --name CindeCodeStudio app.py
+          New-Item -Path dist/CindeCodeStudio/tools -ItemType Directory -Force | Out-Null
+          New-Item -Path dist/CindeCodeStudio/exports -ItemType Directory -Force | Out-Null
+          Copy-Item README.md dist/CindeCodeStudio/README.md
+      - name: Upload ZIP artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: CindeCodeStudio-Windows-portable
+          path: dist/CindeCodeStudio/
+          if-no-files-found: error
