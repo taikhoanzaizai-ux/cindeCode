@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+build/
+dist/
+*.spec
+data/
+updates/
+*.mp4
+*.mov
+*.mkv
+*.wav
+.env
